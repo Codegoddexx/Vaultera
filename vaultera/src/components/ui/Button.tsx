@@ -19,7 +19,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: "text-slate-400 hover:text-white hover:bg-white/5",
       danger: "bg-rose-500/10 border border-rose-500/50 text-rose-400 hover:bg-rose-500/20",
     };
-    const sizes = { sm: "text-xs px-3 py-2 gap-1.5", md: "text-sm px-5 py-2.5 gap-2", lg: "text-base px-7 py-3.5 gap-2.5" };
+    const sizes = { sm: "text-xs px-3 py-2 gap-1.5", md: "text-sm px-5 py-2.5 gap-2", lg: "text-base px-17 py-5 gap-2.5" };
     return (
       <motion.button ref={ref} whileTap={{ scale: 0.97 }}
         className={cn(base, variants[variant], sizes[size], className)}

@@ -3,43 +3,40 @@
 :root {
   --font-playfair: 'Playfair Display', serif;
   --font-dm-sans: 'DM Sans', sans-serif;
+  --max-width: 1600px;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-dm-sans);
   background: #080B12;
   color: white;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
-.font-display {
-  font-family: var(--font-playfair);
+/* Page centering — this is the key fix */
+body > * {
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Scrollbar */
+section { position: relative; }
+.font-display { font-family: var(--font-playfair); }
+
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
-/* Select options */
 select option { background: #0C0F1A; color: white; }
 
-/* Number input - hide arrows */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-/* Gradient text utility */
 .gold-text {
   background: linear-gradient(135deg, #F59E0B, #FCD34D);
   -webkit-background-clip: text;
@@ -47,10 +44,12 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
   background-clip: text;
 }
 
-/* Glow utilities */
 .glow-gold { box-shadow: 0 0 40px rgba(245, 158, 11, 0.15); }
 .glow-blue { box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
-
-/* 3D card perspective */
-.perspective { perspective: 1000px; }
+.perspective { perspective: 1200px; }
 .preserve-3d { transform-style: preserve-3d; }
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(200%) skewX(-12deg); }
+}
