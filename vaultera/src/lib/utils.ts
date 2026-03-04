@@ -5,6 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Mock auth — swap with NextAuth + DB later
+export const MOCK_CREDENTIALS = {
+  email: "adachi@vaultera.com",
+  password: "vaultera123",
+};
+
+export function signIn(email: string, password: string): boolean {
+  return (
+    email === MOCK_CREDENTIALS.email &&
+    password === MOCK_CREDENTIALS.password
+  );
+}
+
 export function formatCurrency(
   amount: number,
   currency: string,

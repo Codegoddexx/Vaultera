@@ -2,7 +2,7 @@ import type { Wallet, Transaction, InvestmentPlan, ActiveInvestment, ExchangeRat
 
 export const MOCK_USER: User = {
   id: "user_001",
-  name: "Adaeze Okonkwo",
+  name: "Adachi Jessica",
   email: "adaeze@vaultera.com",
   kycVerified: true,
   tier: "Premium",
