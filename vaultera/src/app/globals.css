@@ -27,7 +27,11 @@
   --shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 html { scroll-behavior: smooth; }
 
 body {
@@ -59,7 +63,12 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
 /* ── Utility classes — all pull from CSS vars ── */
 .vt-bg        { background: var(--bg-primary); }
 .vt-surface   { background: var(--bg-surface); }
-.vt-card      { background: var(--bg-card); border: 1px solid var(--border); }
+.vt-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
 .vt-text      { color: var(--text-primary); }
 .vt-text-2    { color: var(--text-secondary); }
 .vt-text-m    { color: var(--text-muted); }
@@ -99,4 +108,19 @@ svg, img, video, canvas, .no-transition {
 @keyframes shimmer {
   0%   { transform: translateX(-100%) skewX(-12deg); }
   100% { transform: translateX(200%)  skewX(-12deg); }
+}
+
+/* ── Global layout rhythm ── */
+.section {
+  padding-top: clamp(5rem, 8vw, 8rem);
+  padding-bottom: clamp(5rem, 8vw, 8rem);
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }

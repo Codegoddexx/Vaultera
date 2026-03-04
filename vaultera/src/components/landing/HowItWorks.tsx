@@ -37,17 +37,27 @@ export default function HowItWorks() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {STEPS.map((step, i) => (
-          <motion.div key={step.number}
-            initial={{ opacity: 0, y: 50 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: i * 0.15 }}
-            className="relative text-center group">
-            <motion.div whileHover={{ scale: 1.1 }}
-              className="relative w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center"
-              style={{ background: `${step.color}15`, border: `1px solid ${step.color}30` }}>
-              <step.icon size={24} style={{ color: step.color }} />
-              <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center text-black"
-                style={{ background: step.color }}>{i + 1}</div>
-            </motion.div>
+ <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 50 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.7, delay: i * 0.15 }}
+                className="relative text-center group"
+              >
+                {/* Number bubble */}
+                <motion.div
+                  whileHover={{ scale: 1.1, rotateY: 180 }}
+                  transition={{ duration: 0.4 }}
+                  className="relative w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+                  style={{ background: `${step.color}15`, border: `1px solid ${step.color}30` }}
+                >
+                  <step.icon size={24} style={{ color: step.color }} />
+                  {/* Step number */}
+                  <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center text-black"
+                    style={{ background: step.color }}>
+                    {i + 1}
+                  </div>
+                </motion.div>
             <h3 className="text-base font-bold mb-3" style={{ color: "var(--text-primary)" }}>{step.title}</h3>
             <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{step.desc}</p>
           </motion.div>
