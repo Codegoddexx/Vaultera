@@ -90,7 +90,7 @@ export default function DashboardPage() {
                     <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
                       {wallet.currency}
                     </div>
-                    <div className="text-[10px]" style={{ color: "var(--text-dim)" }}>{wallet.name}</div>
+                    <div className="text-[10px]" style={{ color: "var(--text-dim)" }}>{wallet.currency} Wallet</div>
                   </div>
                 </div>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black"
@@ -135,19 +135,19 @@ export default function DashboardPage() {
             >
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{
-                  background: tx.type === "credit"
+                  background: tx.type === "receive"
                     ? "color-mix(in srgb, var(--green) 12%, transparent)"
                     : tx.type === "convert"
                     ? "color-mix(in srgb, var(--gold) 12%, transparent)"
                     : "color-mix(in srgb, var(--blue) 12%, transparent)"
                 }}>
-                {tx.type === "credit" ? <ArrowDownLeft size={16} style={{ color: "var(--green)" }} />
+                {tx.type === "receive" ? <ArrowDownLeft size={16} style={{ color: "var(--green)" }} />
                   : tx.type === "convert" ? <ArrowLeftRight size={16} style={{ color: "var(--gold)" }} />
                   : <ArrowUpRight size={16} style={{ color: "var(--blue)" }} />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-                  {tx.description}
+                  {tx.note}
                 </div>
                 <div className="text-xs" style={{ color: "var(--text-muted)" }}>
                   {formatDate(tx.date)}
@@ -155,8 +155,8 @@ export default function DashboardPage() {
               </div>
               <div className="text-right shrink-0">
                 <div className="text-sm font-bold"
-                  style={{ color: tx.type === "credit" ? "var(--green)" : tx.type === "debit" ? "var(--red)" : "var(--gold)" }}>
-                  {tx.type === "credit" ? "+" : tx.type === "debit" ? "-" : "~"}
+                  style={{ color: tx.type === "receive" ? "var(--green)" : tx.type === "send" ? "var(--red)" : "var(--gold)" }}>
+                  {tx.type === "receive" ? "+" : tx.type === "send" ? "-" : "~"}
                   {formatCurrency(tx.amount, tx.currency)}
                 </div>
                 <div className="text-[10px] capitalize px-2 py-0.5 rounded-full mt-0.5 inline-block"

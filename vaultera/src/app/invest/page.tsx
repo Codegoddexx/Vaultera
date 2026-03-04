@@ -15,7 +15,7 @@ const RISK_COLORS: Record<string, string> = {
 
 export default function InvestPage() {
   const { activeInvestments } = useAppStore();
-  const [tab, setTab] = useState<"plans"|"active">("plans");
+  const [tab, setTab] = useState<"plans" | "active">("plans");
   const [currency, setCurrency] = useState("all");
 
   const filtered = currency === "all"
@@ -25,7 +25,8 @@ export default function InvestPage() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex gap-2 p-1 rounded-2xl w-fit" style={{ background: "var(--bg-surface)" }}>
+      <div className="flex gap-2 p-1 rounded-2xl w-fit"
+        style={{ background: "var(--bg-surface)" }}>
         {["plans", "active"].map(t => (
           <button key={t} onClick={() => setTab(t as any)}
             className="px-5 py-2 rounded-xl text-sm font-semibold capitalize transition-all"
@@ -40,8 +41,8 @@ export default function InvestPage() {
 
       {tab === "plans" && (
         <>
-          {/* Filter */}
-          <div className="flex gap-2">
+          {/* Currency filter */}
+          <div className="flex gap-2 flex-wrap">
             {["all", "USD", "EUR", "GBP"].map(c => (
               <button key={c} onClick={() => setCurrency(c)}
                 className="px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all border"
@@ -56,52 +57,64 @@ export default function InvestPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map((plan, i) => (
-              <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-                whileHover={{ y: -5 }}
-                className="rounded-2xl border p-5 cursor-pointer relative overflow-hidden"
-                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "color-mix(in srgb, var(--gold) 30%, transparent)"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"}
-              >
-                <div className="absolute inset-x-0 top-0 h-px"
-                  style={{ background: `linear-gradient(90deg, transparent, ${RISK_COLORS[plan.risk]}60, transparent)` }} />
+            {filtered.map((plan, i) => {
+              const riskKey = plan.risk.toLowerCase();
+              const riskColor = RISK_COLORS[riskKey] ?? "var(--text-muted)";
+              return (
+                <motion.div key={plan.id}
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07 }}
+                  whileHover={{ y: -5 }}
+                  className="rounded-2xl border p-5 cursor-pointer relative overflow-hidden"
+                  style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "color-mix(in srgb, var(--gold) 30%, transparent)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"}
+                >
+                  <div className="absolute inset-x-0 top-0 h-px"
+                    style={{ background: `linear-gradient(90deg, transparent, ${riskColor}60, transparent)` }} />
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{getCurrencyFlag(plan.currency)}</span>
-                    <span className="text-xs font-bold uppercase" style={{ color: "var(--text-muted)" }}>{plan.currency}</span>
-                  </div>
-                  <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full"
-                    style={{ background: `color-mix(in srgb, ${RISK_COLORS[plan.risk]} 12%, transparent)`, color: RISK_COLORS[plan.risk] }}>
-                    {plan.risk} risk
-                  </span>
-                </div>
-
-                <h3 className="font-bold mb-1" style={{ color: "var(--text-primary)" }}>{plan.name}</h3>
-                <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>{plan.description}</p>
-
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  {[
-                    { label: "ROI", value: `${plan.roi}% p.a.`, icon: TrendingUp },
-                    { label: "Duration", value: `${plan.duration}d`, icon: Calendar },
-                    { label: "Min", value: formatCurrency(plan.minAmount, plan.currency), icon: Lock },
-                  ].map(d => (
-                    <div key={d.label} className="text-center p-2 rounded-xl"
-                      style={{ background: "var(--bg-surface)" }}>
-                      <d.icon size={12} className="mx-auto mb-1" style={{ color: "var(--gold)" }} />
-                      <div className="text-[10px] font-black" style={{ color: "var(--text-primary)" }}>{d.value}</div>
-                      <div className="text-[9px]" style={{ color: "var(--text-muted)" }}>{d.label}</div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{getCurrencyFlag(plan.currency)}</span>
+                      <span className="text-xs font-bold uppercase" style={{ color: "var(--text-muted)" }}>
+                        {plan.currency}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full"
+                      style={{
+                        background: `color-mix(in srgb, ${riskColor} 12%, transparent)`,
+                        color: riskColor,
+                      }}>
+                      {plan.risk} risk
+                    </span>
+                  </div>
 
-                <button className="gold-btn w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1">
-                  Invest Now <ChevronRight size={14} />
-                </button>
-              </motion.div>
-            ))}
+                  <h3 className="font-bold mb-1" style={{ color: "var(--text-primary)" }}>{plan.name}</h3>
+                  <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+                    Earn {plan.roi} returns over {plan.duration}
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {[
+                      { label: "ROI", value: plan.roi, icon: TrendingUp },
+                      { label: "Duration", value: plan.duration, icon: Calendar },
+                      { label: "Min", value: formatCurrency(plan.minAmount, plan.currency), icon: Lock },
+                    ].map(d => (
+                      <div key={d.label} className="text-center p-2 rounded-xl"
+                        style={{ background: "var(--bg-surface)" }}>
+                        <d.icon size={12} className="mx-auto mb-1" style={{ color: "var(--gold)" }} />
+                        <div className="text-[10px] font-black" style={{ color: "var(--text-primary)" }}>{d.value}</div>
+                        <div className="text-[9px]" style={{ color: "var(--text-muted)" }}>{d.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button className="gold-btn w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1">
+                    Invest Now <ChevronRight size={14} />
+                  </button>
+                </motion.div>
+              );
+            })}
           </div>
         </>
       )}
@@ -113,42 +126,42 @@ export default function InvestPage() {
               No active investments yet. Browse plans to get started.
             </div>
           ) : (
-            activeInvestments.map((inv, i) => {
-              const progress = ((Date.now() - new Date(inv.startDate).getTime()) /
-                (new Date(inv.maturityDate).getTime() - new Date(inv.startDate).getTime())) * 100;
-              return (
-                <motion.div key={inv.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="rounded-2xl border p-5"
-                  style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <div className="font-bold" style={{ color: "var(--text-primary)" }}>{inv.planName}</div>
-                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        Matures: {new Date(inv.maturityDate).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-black" style={{ fontFamily: "var(--font-playfair)", color: "var(--gold)" }}>
-                        {formatCurrency(inv.currentValue, inv.currency)}
-                      </div>
-                      <div className="text-xs" style={{ color: "var(--green)" }}>
-                        +{formatCurrency(inv.currentValue - inv.amount, inv.currency)} earned
-                      </div>
+            activeInvestments.map((inv, i) => (
+              <motion.div key={inv.id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-2xl border p-5"
+                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <div className="font-bold" style={{ color: "var(--text-primary)" }}>{inv.planName}</div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      Matures: {new Date(inv.maturityDate).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="w-full h-2 rounded-full mb-1" style={{ background: "var(--border)" }}>
-                    <motion.div className="h-2 rounded-full"
-                      initial={{ width: 0 }} animate={{ width: `${Math.min(progress, 100)}%` }}
-                      transition={{ duration: 1, delay: 0.3 }}
-                      style={{ background: "linear-gradient(90deg, var(--gold), var(--gold-light))" }} />
+                  <div className="text-right">
+                    <div className="text-lg font-black"
+                      style={{ fontFamily: "var(--font-playfair)", color: "var(--gold)" }}>
+                      {formatCurrency(inv.projectedReturn, inv.currency)}
+                    </div>
+                    <div className="text-xs" style={{ color: "var(--green)" }}>
+                      +{formatCurrency(inv.projectedReturn - inv.amount, inv.currency)} projected
+                    </div>
                   </div>
-                  <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                    {Math.round(Math.min(progress, 100))}% complete
-                  </div>
-                </motion.div>
-              );
-            })
+                </div>
+                {/* Progress bar */}
+                <div className="w-full h-2 rounded-full mb-1" style={{ background: "var(--border)" }}>
+                  <motion.div className="h-2 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(inv.progress, 100)}%` }}
+                    transition={{ duration: 1, delay: 0.3 }}
+                    style={{ background: "linear-gradient(90deg, var(--gold), var(--gold-light))" }} />
+                </div>
+                <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  {Math.round(Math.min(inv.progress, 100))}% complete · {inv.roi} ROI
+                </div>
+              </motion.div>
+            ))
           )}
         </div>
       )}
