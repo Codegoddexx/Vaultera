@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import { useThemeStore } from "@/store/useThemeStore";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
+  const { theme, toggleTheme } = useThemeStore();
 
   useEffect(() => {
     return scrollY.on("change", (v) => setScrolled(v > 40));
@@ -30,7 +32,8 @@ export default function Navbar() {
           : "bg-transparent py-5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-4">
+      <div className="mx-auto px-6 flex items-center justify-between gap-4">
+        {/* Logo */}
         <Link href="/" className="shrink-0">
           <motion.div whileHover={{ scale: 1.02 }}>
             <div className="text-xl font-black tracking-tight bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent"
@@ -43,7 +46,8 @@ export default function Navbar() {
           </motion.div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6 lg:gap-10">
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-6 lg:gap-8">
           {links.map((l, i) => (
             <motion.a key={l.label} href={l.href}
               initial={{ opacity: 0, y: -10 }}
@@ -56,10 +60,25 @@ export default function Navbar() {
           ))}
         </div>
 
+        {/* Desktop right side */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
+          {/* Theme toggle */}
+          <motion.button
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-all duration-300"
+          >
+            {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+            <span className="text-xs font-semibold">
+              {theme === "dark" ? "Light" : "Dark"}
+            </span>
+          </motion.button>
+
           <Link href="/auth/login">
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="text-sm text-slate-300 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition-all">
+              className="text-sm text-slate-300 hover:text-white px-4 py-2 rounded-xl hover:bg-white/5 transition-all whitespace-nowrap">
               Sign In
             </motion.button>
           </Link>
@@ -67,18 +86,30 @@ export default function Navbar() {
             <motion.button
               whileHover={{ scale: 1.03, boxShadow: "0 0 30px rgba(245,158,11,0.4)" }}
               whileTap={{ scale: 0.97 }}
-              className="text-sm font-bold bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-6 py-2.5 rounded-xl">
+              className="text-sm font-bold bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-5 py-2.5 rounded-xl whitespace-nowrap">
               Get Started
             </motion.button>
           </Link>
         </div>
 
-        <button onClick={() => setOpen(!open)}
-          className="md:hidden text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all shrink-0">
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        {/* Mobile right side */}
+        <div className="flex md:hidden items-center gap-2">
+          {/* Theme toggle — mobile */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400"
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          {/* Hamburger */}
+          <button onClick={() => setOpen(!open)}
+            className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all">
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
+      {/* Mobile menu */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -89,7 +120,7 @@ export default function Navbar() {
             <div className="px-6 py-5 flex flex-col gap-4">
               {links.map((l) => (
                 <a key={l.label} href={l.href} onClick={() => setOpen(false)}
-                  className="text-slate-300 hover:text-white text-sm py-2 border-b border-white/5 last:border-0">
+                  className="text-slate-300 hover:text-white text-sm py-1.5 border-b border-white/5 last:border-0">
                   {l.label}
                 </a>
               ))}
