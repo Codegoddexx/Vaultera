@@ -25,7 +25,7 @@ export default function PageLoader({ show }: PageLoaderProps) {
             className="flex flex-col items-center gap-6"
           >
             <img
-              src="/assets/globe-loader.gif"
+              src="/assets/globe_faces_currency.gif"
               alt="Loading Vaultera..."
               className="w-36 h-36 sm:w-44 sm:h-44"
             />
