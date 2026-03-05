@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/layout/ThemeProvider";
+import NavigationProvider from "@/components/layout/NavigationProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -17,8 +18,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Vaultera — The New Era of Money Movement",
-  description: "Convert, hold, send and invest in 180 world currencies. Built for Africans going global.",
-  keywords: ["currency", "exchange", "invest", "wallet", "fintech", "Africa"],
+  description: "Convert, hold, send and invest in 180 world currencies.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +26,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          {children}
+          <NavigationProvider>
+            {children}
+          </NavigationProvider>
         </ThemeProvider>
       </body>
     </html>
