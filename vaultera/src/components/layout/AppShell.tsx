@@ -7,7 +7,7 @@ import TopBar from "./TopBar";
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  return (
+  return ( 
     <div className="flex h-screen bg-[var(--bg-primary)]">
 
       {/* Desktop Sidebar */}
@@ -46,3 +46,5 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+ 
