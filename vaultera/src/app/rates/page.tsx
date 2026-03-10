@@ -1,48 +1,81 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, TrendingUp, TrendingDown } from "lucide-react";
-import { ALL_CURRENCIES, MOCK_RATES } from "@/lib/constants";
+import { Search, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
 import { getCurrencyFlag } from "@/lib/formatters";
 
 const BASE_CURRENCIES = ["USD", "EUR", "GBP", "NGN", "AED"];
 
+interface RateData {
+  rates: Record<string, number>;
+  base: string;
+  lastUpdated: string;
+  source: string;
+}
+
 export default function RatesPage() {
   const [base, setBase] = useState("USD");
   const [search, setSearch] = useState("");
+  const [data, setData] = useState<RateData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = useMemo(() => {
-    return ALL_CURRENCIES.filter(c =>
-      c.code !== base &&
-      (c.code.toLowerCase().includes(search.toLowerCase()) ||
-        c.name.toLowerCase().includes(search.toLowerCase()))
-    );
-  }, [base, search]);
-
-  const getRate = (to: string): string => {
-    const key = `${base}/${to}`;
-    const rev = `${to}/${base}`;
-    if (MOCK_RATES[key]) return Number(MOCK_RATES[key]).toFixed(4);
-    if (MOCK_RATES[rev]) return (1 / Number(MOCK_RATES[rev])).toFixed(4);
-    return "—";
+  const fetchRates = async (baseCurrency: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/rates?base=${baseCurrency}`);
+      const json = await res.json();
+      if (json.success) setData(json);
+    } catch (err) {
+      console.error("Failed to fetch rates:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const CHANGES: Record<string, number> = {
-    EUR: 0.13, GBP: 0.09, NGN: -2.1, AED: 0.0,
-    JPY: 0.32, GHS: -0.8, CHF: 0.05, CAD: 0.12, AUD: -0.3,
-  };
+  useEffect(() => { fetchRates(base); }, [base]);
 
+  const entries = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data.rates)
+      .filter(([code]) =>
+        code !== base &&
+        (code.toLowerCase().includes(search.toLowerCase()))
+      );
+  }, [data, base, search]);
+
+  // Simulated 24h change (real change requires historical data — Phase 2)
   const getChange = (code: string): number => {
-    return CHANGES[code] ?? parseFloat((Math.random() * 2 - 1).toFixed(2));
+    const seed = code.charCodeAt(0) + code.charCodeAt(1);
+    return parseFloat(((seed % 10 - 5) * 0.4).toFixed(2));
   };
 
   return (
     <div className="space-y-5">
 
+      {/* Header with last updated */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          {data && (
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Last updated: {new Date(data.lastUpdated).toLocaleTimeString()} ·{" "}
+              <span style={{ color: data.source === "cache" ? "var(--green)" : "var(--gold)" }}>
+                {data.source === "cache" ? "⚡ Cached" : "🌐 Fresh from API"}
+              </span>
+            </p>
+          )}
+        </div>
+        <button onClick={() => fetchRates(base)}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold self-start sm:self-auto"
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)", color: "var(--gold)" }}>
+          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </div>
+
       {/* Base selector */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-bold uppercase tracking-widest w-full sm:w-auto"
-          style={{ color: "var(--text-muted)" }}>Base Currency:</span>
+          style={{ color: "var(--text-muted)" }}>Base:</span>
         <div className="flex flex-wrap gap-2">
           {BASE_CURRENCIES.map(c => (
             <button key={c} onClick={() => setBase(c)}
@@ -62,15 +95,14 @@ export default function RatesPage() {
       <div className="relative w-full max-w-sm">
         <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2"
           style={{ color: "var(--text-muted)" }} />
-        <input placeholder="Search currency..." value={search}
+        <input placeholder="Search currency code..." value={search}
           onChange={e => setSearch(e.target.value)}
           className="vt-input w-full pl-10 pr-4 py-3 rounded-xl text-sm"
           style={{ borderRadius: "0.75rem" }} />
       </div>
 
-      {/* Table — scrollable on mobile */}
+      {/* Table */}
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
-        {/* Header */}
         <div className="grid grid-cols-3 sm:grid-cols-4 px-4 py-3 text-[10px] font-bold uppercase tracking-widest border-b"
           style={{ background: "var(--bg-surface)", borderColor: "var(--border)", color: "var(--text-muted)" }}>
           <span>Currency</span>
@@ -79,59 +111,57 @@ export default function RatesPage() {
           <span className="text-right">Trend</span>
         </div>
 
-        {/* Rows */}
-        <div style={{ background: "var(--bg-card)" }}>
-          {filtered.slice(0, 60).map((c, i) => {
-            const change = getChange(c.code);
-            const up = change >= 0;
-            return (
-              <motion.div key={c.code}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.015 }}
-                className="grid grid-cols-3 sm:grid-cols-4 items-center px-4 py-3 border-b last:border-0 transition-all"
-                style={{ borderColor: "var(--border)" }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--bg-card-hover)"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-              >
-                {/* Currency */}
-                <div className="flex items-center gap-2">
-                  <span className="text-lg sm:text-xl">{getCurrencyFlag(c.code)}</span>
-                  <div>
-                    <div className="text-xs sm:text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                      {c.code}
+        {loading ? (
+          <div className="py-20 text-center text-sm" style={{ color: "var(--text-muted)", background: "var(--bg-card)" }}>
+            <RefreshCw size={24} className="animate-spin mx-auto mb-3" style={{ color: "var(--gold)" }} />
+            Fetching live rates...
+          </div>
+        ) : (
+          <div style={{ background: "var(--bg-card)" }}>
+            {entries.slice(0, 80).map(([code, rate], i) => {
+              const change = getChange(code);
+              const up = change >= 0;
+              return (
+                <motion.div key={code}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.008 }}
+                  className="grid grid-cols-3 sm:grid-cols-4 items-center px-4 py-3 border-b last:border-0 transition-all"
+                  style={{ borderColor: "var(--border)" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--bg-card-hover)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg sm:text-xl">{getCurrencyFlag(code)}</span>
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold" style={{ color: "var(--text-primary)" }}>{code}</div>
                     </div>
-                    <div className="text-[9px] sm:text-[10px] hidden sm:block truncate max-w-[100px]"
-                      style={{ color: "var(--text-muted)" }}>{c.name}</div>
                   </div>
-                </div>
 
-                {/* Rate */}
-                <div className="text-right text-xs sm:text-sm font-bold"
-                  style={{ color: "var(--text-primary)" }}>
-                  {getRate(c.code)}
-                </div>
+                  <div className="text-right text-xs sm:text-sm font-bold font-mono"
+                    style={{ color: "var(--text-primary)" }}>
+                    {rate.toFixed(4)}
+                  </div>
 
-                {/* Change — hidden on mobile */}
-                <div className="text-right text-xs sm:text-sm font-semibold hidden sm:block"
-                  style={{ color: up ? "var(--green)" : "var(--red)" }}>
-                  {up ? "+" : ""}{change.toFixed(2)}%
-                </div>
-
-                {/* Trend */}
-                <div className="flex justify-end items-center gap-1">
-                  {up
-                    ? <TrendingUp size={14} style={{ color: "var(--green)" }} />
-                    : <TrendingDown size={14} style={{ color: "var(--red)" }} />}
-                  <span className="text-[10px] sm:hidden"
+                  <div className="text-right text-xs sm:text-sm font-semibold hidden sm:block"
                     style={{ color: up ? "var(--green)" : "var(--red)" }}>
-                    {up ? "+" : ""}{change.toFixed(1)}%
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                    {up ? "+" : ""}{change.toFixed(2)}%
+                  </div>
+
+                  <div className="flex justify-end items-center gap-1">
+                    {up
+                      ? <TrendingUp size={14} style={{ color: "var(--green)" }} />
+                      : <TrendingDown size={14} style={{ color: "var(--red)" }} />}
+                    <span className="text-[10px] sm:hidden"
+                      style={{ color: up ? "var(--green)" : "var(--red)" }}>
+                      {up ? "+" : ""}{change.toFixed(1)}%
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
