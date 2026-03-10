@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import type { PrismaClient } from "@prisma/client";
 
 function generateAccountNumber(): string {
   return Math.floor(1000000000 + Math.random() * 9000000000).toString();
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user + default wallets in one transaction
-    const user = await prisma.$transaction(async (tx) => {
+   const user = await prisma.$transaction(async (tx: Parameters<typeof prisma.$transaction>[0] extends (client: infer T) => unknown ? T : never) => {
       const newUser = await tx.user.create({
         data: {
           name,
