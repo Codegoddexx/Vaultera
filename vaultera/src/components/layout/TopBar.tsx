@@ -78,7 +78,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
             {title}
           </h1>
           <p className="text-xs hidden sm:block" style={{ color: "var(--text-muted)" }}>
-            Welcome back, {firstName} 👋
+            Welcome Back, {firstName} 👋
           </p>
         </div>
       </div>
