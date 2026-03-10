@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
-import { signIn } from "@/lib/auth";
+import { signIn } from "next-auth/react";
 import PageLoader from "@/components/layout/PageLoader";
 
 export default function LoginPage() {
@@ -20,27 +20,33 @@ export default function LoginPage() {
       setError("Please fill in all fields.");
       return;
     }
+
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    const ok = signIn(form.email, form.password);
-    if (ok) {
-      // Keep loader showing while navigating in
-      router.push("/dashboard");
-    } else {
-      setError("Invalid email or password. Try adaeze@vaultera.com / vaultera123");
+
+    const result = await signIn("credentials", {
+      email: form.email,
+      password: form.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError("Invalid email or password. Please try again.");
       setLoading(false);
+      return;
     }
+
+    // Success — navigate to dashboard
+    router.push("/dashboard");
+    router.refresh();
   };
 
   return (
     <>
-      {/* Globe loader shows only on sign in API call */}
       <PageLoader show={loading} />
 
       <div className="min-h-screen flex items-center justify-center px-4"
         style={{ background: "var(--bg-primary)" }}>
 
-        {/* Orbs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
             style={{ background: "radial-gradient(circle, var(--gold), transparent)" }} />
@@ -86,7 +92,7 @@ export default function LoginPage() {
                 <div className="relative">
                   <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2"
                     style={{ color: "var(--text-muted)" }} />
-                  <input type="email" placeholder="adaeze@vaultera.com"
+                  <input type="email" placeholder="you@email.com"
                     value={form.email}
                     onChange={e => setForm({ ...form, email: e.target.value })}
                     onKeyDown={e => e.key === "Enter" && handleSubmit()}
@@ -125,9 +131,7 @@ export default function LoginPage() {
                 </a>
               </div>
 
-              <motion.button
-                onClick={handleSubmit}
-                disabled={loading}
+              <motion.button onClick={handleSubmit} disabled={loading}
                 whileHover={!loading ? { scale: 1.02 } : {}}
                 whileTap={!loading ? { scale: 0.98 } : {}}
                 className="gold-btn w-full py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-black"
@@ -143,10 +147,6 @@ export default function LoginPage() {
               </Link>
             </div>
           </div>
-
-          <p className="mt-4 text-center text-xs" style={{ color: "var(--text-dim)" }}>
-            Demo: adaeze@vaultera.com / vaultera123
-          </p>
         </motion.div>
       </div>
     </>

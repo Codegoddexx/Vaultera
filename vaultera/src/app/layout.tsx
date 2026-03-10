@@ -3,6 +3,7 @@ import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/layout/ThemeProvider";
 import NavigationProvider from "@/components/layout/NavigationProvider";
+import SessionProvider from "@/components/layout/SessionProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -25,11 +26,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProvider>
-          <NavigationProvider>
-            {children}
-          </NavigationProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <NavigationProvider>
+              {children}
+            </NavigationProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

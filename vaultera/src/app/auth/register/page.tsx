@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from "lucide-react";
+import { signIn } from "next-auth/react";
 import PageLoader from "@/components/layout/PageLoader";
 
 const PERKS = [
@@ -17,13 +18,59 @@ export default function RegisterPage() {
   const router = useRouter();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
 
   const handleRegister = async () => {
-    if (!form.name || !form.email || !form.password) return;
+    setError("");
+    if (!form.name || !form.email || !form.password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    router.push("/dashboard");
+
+    try {
+      // 1. Create account
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Something went wrong.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Auto sign in after registration
+      const result = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Account created! Please sign in.");
+        router.push("/auth/login");
+        return;
+      }
+
+      // 3. Go to dashboard
+      router.push("/dashboard");
+      router.refresh();
+
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -74,8 +121,10 @@ export default function RegisterPage() {
           {/* Right form */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }} className="relative">
+
             <div className="absolute inset-x-0 top-0 h-px rounded-t-3xl"
               style={{ background: "linear-gradient(90deg, transparent, var(--gold), transparent)" }} />
+
             <div className="rounded-3xl border p-8"
               style={{ background: "var(--bg-surface)", borderColor: "var(--border)" }}>
 
@@ -88,6 +137,18 @@ export default function RegisterPage() {
                   Create your free account. No credit card needed.
                 </p>
               </div>
+
+              {error && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 px-4 py-3 rounded-xl text-sm border"
+                  style={{
+                    background: "color-mix(in srgb, var(--red) 10%, transparent)",
+                    borderColor: "color-mix(in srgb, var(--red) 30%, transparent)",
+                    color: "var(--red)"
+                  }}>
+                  {error}
+                </motion.div>
+              )}
 
               <div className="space-y-4">
                 {[
@@ -103,6 +164,7 @@ export default function RegisterPage() {
                       <input type={f.type} placeholder={f.placeholder}
                         value={form[f.field as keyof typeof form]}
                         onChange={e => setForm({ ...form, [f.field]: e.target.value })}
+                        onKeyDown={e => e.key === "Enter" && handleRegister()}
                         className="vt-input w-full pl-10 pr-4 py-3 rounded-xl text-sm"
                         style={{ borderRadius: "0.75rem" }} />
                     </div>
@@ -118,6 +180,7 @@ export default function RegisterPage() {
                     <input type={show ? "text" : "password"} placeholder="Min. 8 characters"
                       value={form.password}
                       onChange={e => setForm({ ...form, password: e.target.value })}
+                      onKeyDown={e => e.key === "Enter" && handleRegister()}
                       className="vt-input w-full pl-10 pr-10 py-3 rounded-xl text-sm"
                       style={{ borderRadius: "0.75rem" }} />
                     <button onClick={() => setShow(!show)}
@@ -134,8 +197,7 @@ export default function RegisterPage() {
                   <a href="#" style={{ color: "var(--gold)" }}>Privacy Policy</a>.
                 </p>
 
-                <motion.button
-                  onClick={handleRegister}
+                <motion.button onClick={handleRegister}
                   disabled={!form.name || !form.email || !form.password || loading}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="gold-btn w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-black"
