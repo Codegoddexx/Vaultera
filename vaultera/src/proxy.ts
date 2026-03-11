@@ -32,4 +32,4 @@ export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|assets|globe_faces_currency.gif).*)",
   ],
-};
+}; 
