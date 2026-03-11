@@ -1,4 +1,3 @@
-
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -10,6 +9,7 @@ import {
   LogOut, Shield,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
+import { signOut } from "next-auth/react";
 
 const NAV = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -67,7 +67,7 @@ export default function Sidebar() {
                   background: active ? "color-mix(in srgb, var(--gold) 12%, transparent)" : "transparent",
                   color: active ? "var(--gold)" : "var(--text-muted)",
                 }}
-                onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.background = "var(--bg-card)"; }}
+                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.background = "var(--bg-card)"; }}}
                 onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}}
               >
                 {active && (
@@ -115,16 +115,16 @@ export default function Sidebar() {
           </AnimatePresence>
         </div>
 
-        {/* Logout */}
-        <Link href="/auth/login">
-          <div className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-all"
-            style={{ color: "var(--text-muted)" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--red)"; (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--red) 8%, transparent)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
-            <LogOut size={16} className="shrink-0" />
-            {!collapsed && <span className="text-xs font-medium">Sign Out</span>}
-          </div>
-        </Link>
+        {/* Sign Out */}
+        <button
+          onClick={() => signOut({ callbackUrl: "/auth/login" })}
+          className="w-full flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-all"
+          style={{ color: "var(--text-muted)" }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--red)"; (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--red) 8%, transparent)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
+          <LogOut size={16} className="shrink-0" />
+          {!collapsed && <span className="text-xs font-medium">Sign Out</span>}
+        </button>
 
         {/* Collapse toggle */}
         <button onClick={() => setCollapsed(!collapsed)}
