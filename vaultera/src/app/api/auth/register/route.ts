@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
-// import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, Prisma } from "@prisma/client";
 
 function generateAccountNumber(): string {
   const timestamp = Date.now().toString().slice(-6);
@@ -82,18 +81,12 @@ export async function POST(req: NextRequest) {
       });
 
       for (const currency of DEFAULT_CURRENCIES) {
-        const result = await tx.$queryRaw<{ account_number: string }[]>`
-      SELECT LPAD(nextval('account_number_seq')::text, 10, '0') as account_number
-    `;
-
-        const accountNumber = result[0].account_number;
-
         await tx.wallet.create({
           data: {
             userId: newUser.id,
             currency,
             balance: 0,
-            accountNumber,
+            accountNumber: generateAccountNumber(),
           },
         });
       }
