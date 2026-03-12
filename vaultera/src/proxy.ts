@@ -1,9 +1,13 @@
 import { auth } from "@/lib/auth/index";
 import { NextResponse } from "next/server";
 
-export default auth((req) => {
+export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth;
   const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith('/api/auth')) {
+    return NextResponse.next();
+  }
 
   const protectedRoutes = [
     "/dashboard",
@@ -26,10 +30,12 @@ export default auth((req) => {
   if (isLoggedIn && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register"))) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
   }
+
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|assets|globe_faces_currency.gif).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|assets|globe_faces_currency.gif).*)",
   ],
-}; 
+};
