@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd vaultera && npm run build",
-  "outputDirectory": "vaultera/.next",
-  "installCommand": "cd vaultera && npm install",
-  "framework": "nextjs",
-}
