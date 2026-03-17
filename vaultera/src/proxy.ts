@@ -1,9 +1,9 @@
 import { auth } from "@/lib/auth/index";
 import { NextResponse } from "next/server";
 
-export const proxy = auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const { pathname } = req.nextUrl;
+export const proxy = auth((request) => {
+  const isLoggedIn = !!request.auth;
+  const { pathname } = request.nextUrl;
 
   if (pathname.startsWith('/api/auth')) {
     return NextResponse.next();
@@ -22,13 +22,13 @@ export const proxy = auth((req) => {
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route));
 
   if (isProtected && !isLoggedIn) {
-    const loginUrl = new URL("/auth/login", req.nextUrl.origin);
+    const loginUrl = new URL("/auth/login", request.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isLoggedIn && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register"))) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/dashboard", request.nextUrl.origin));
   }
 
   return NextResponse.next();
