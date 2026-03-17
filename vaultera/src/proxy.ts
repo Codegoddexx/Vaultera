@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth/index";
+import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export const proxy = auth((request) => {
